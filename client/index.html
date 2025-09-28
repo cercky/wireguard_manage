@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WireGuard监控系统</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WireGuard监控系统</h1>
+        </header>
+        
+        <nav>
+            <button id="dashboard-tab" class="active">仪表盘</button>
+            <button id="users-tab">用户管理</button>
+            <button id="events-tab">会话事件</button>
+            <button id="traffic-tab">流量统计</button>
+        </nav>
+        
+        <main>
+            <!-- 仪表盘内容 -->
+            <section id="dashboard-section" class="tab-content active">
+                <h2>系统概览</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>注册用户</h3>
+                        <p id="registered-users">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>在线用户</h3>
+                        <p id="online-users">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>活跃会话</h3>
+                        <p id="active-sessions">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>系统运行时长</h3>
+                        <p id="uptime-hours">--</p>
+                    </div>
+                </div>
+                
+                <div class="traffic-summary">
+                    <div class="traffic-card">
+                        <h3>总上传流量</h3>
+                        <p id="total-upload">--</p>
+                    </div>
+                    <div class="traffic-card">
+                        <h3>总下载流量</h3>
+                        <p id="total-download">--</p>
+                    </div>
+                    <div class="traffic-card">
+                        <h3>今日上传</h3>
+                        <p id="today-upload">--</p>
+                    </div>
+                    <div class="traffic-card">
+                        <h3>今日下载</h3>
+                        <p id="today-download">--</p>
+                    </div>
+                </div>
+                
+                <div class="system-status">
+                    <h3>系统状态</h3>
+                    <p>监控接口: <span id="interface">--</span></p>
+                    <p>握手超时阈值: <span id="max-handshake-age">--</span> 秒</p>
+                </div>
+            </section>
+            
+            <!-- 用户管理内容 -->
+            <section id="users-section" class="tab-content">
+                <div class="section-header">
+                    <h2>用户管理</h2>
+                    <button id="add-user-btn">添加用户</button>
+                </div>
+                
+                <!-- 添加用户表单 -->
+                <div id="user-form" class="form-container">
+                    <h3>添加新用户</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="peer-pubkey">公钥 *</label>
+                            <input type="text" id="peer-pubkey" placeholder="44字符的WireGuard公钥" maxlength="44">
+                            <small>WireGuard客户端生成的44字符公钥</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="nickname">昵称</label>
+                            <input type="text" id="nickname" placeholder="用户昵称">
+                        </div>
+                        <div class="form-group">
+                            <label for="mail">邮箱</label>
+                            <input type="email" id="mail" placeholder="user@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">手机号</label>
+                            <input type="text" id="phone" placeholder="手机号码">
+                        </div>
+                        <div class="form-group">
+                            <label for="bandwidth-limit">带宽限制 (KB/s)</label>
+                            <input type="number" id="bandwidth-limit" placeholder="0 = 无限制" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="data-limit">流量限制 (MB)</label>
+                            <input type="number" id="data-limit" placeholder="0 = 无限制" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="expiry-date">到期时间</label>
+                            <input type="datetime-local" id="expiry-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="note">备注</label>
+                            <textarea id="note" placeholder="用户备注信息" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button id="submit-user-btn" class="primary">提交</button>
+                        <button id="cancel-user-btn" class="secondary">取消</button>
+                    </div>
+                </div>
+                
+                <!-- 编辑用户表单 -->
+                <div id="edit-user-form" class="form-container">
+                    <h3>编辑用户</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="edit-pubkey">公钥</label>
+                            <input type="text" id="edit-pubkey" readonly>
+                            <small>公钥不可修改</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-nickname">昵称</label>
+                            <input type="text" id="edit-nickname" placeholder="用户昵称">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-mail">邮箱</label>
+                            <input type="email" id="edit-mail" placeholder="user@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-phone">手机号</label>
+                            <input type="text" id="edit-phone" placeholder="手机号码">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-bandwidth-limit">带宽限制 (KB/s)</label>
+                            <input type="number" id="edit-bandwidth-limit" placeholder="0 = 无限制" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-data-limit">流量限制 (MB)</label>
+                            <input type="number" id="edit-data-limit" placeholder="0 = 无限制" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-expiry-date">到期时间</label>
+                            <input type="datetime-local" id="edit-expiry-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-enabled">状态</label>
+                            <select id="edit-enabled">
+                                <option value="1">启用</option>
+                                <option value="0">禁用</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="edit-note">备注</label>
+                            <textarea id="edit-note" placeholder="用户备注信息" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button id="update-user-btn" class="primary">更新</button>
+                        <button id="cancel-edit-btn" class="secondary">取消</button>
+                    </div>
+                </div>
+                
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>昵称</th>
+                            <th>公钥</th>
+                            <th>内网IP</th>
+                            <th>邮箱</th>
+                            <th>状态</th>
+                            <th>流量使用</th>
+                            <th>最后登录</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 用户数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- 会话事件内容 -->
+            <section id="events-section" class="tab-content">
+                <div class="section-header">
+                    <h2>会话事件</h2>
+                    <button id="show-history-btn">查看历史</button>
+                </div>
+                
+                <table id="events-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>状态</th>
+                            <th>会话上传</th>
+                            <th>会话下载</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 会话数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- 流量统计内容 -->
+            <section id="traffic-section" class="tab-content">
+                <div class="section-header">
+                    <h2>流量统计</h2>
+                    <select id="days-select">
+                        <option value="7">最近7天</option>
+                        <option value="30">最近30天</option>
+                        <option value="90">最近90天</option>
+                    </select>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="traffic-chart"></canvas>
+                </div>
+                
+                <table id="traffic-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>上传流量</th>
+                            <th>下载流量</th>
+                            <th>总计</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 流量数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+        
+        <footer>
+            <p>WireGuard监控系统 &copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- 确认删除对话框 -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>确认删除</h3>
+            <p>确定要删除用户 <span id="delete-user-name"></span> 吗？</p>
+            <p class="warning">此操作将禁用用户并结束其所有活跃会话。</p>
+            <div class="modal-buttons">
+                <button id="confirm-delete-btn" class="danger">确认删除</button>
+                <button id="cancel-delete-btn" class="secondary">取消</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+WireGuard 监控系统 API 文档
+基础信息
+基础 URL：服务器地址（如http://192.168.0.236:8000）
+数据格式：所有响应均为 JSON 格式
+跨域支持：允许所有来源的跨域请求（Access-Control-Allow-Origin: *）
+一、GET 请求 API
+1. 获取用户列表
+方法：GET
+路径：/api/users
+描述：获取系统中所有用户的完整信息（包含 ID、公钥、昵称、邮箱、流量统计等）
+响应示例：
+[
+{
+"id": 1,
+"peer_pubkey": "abcdef123456...",
+"nickname": "User_1",
+"mail": "user1@example.com",
+"phone": "13800138000",
+"login_ip": "192.168.1.1",
+"bandwidth_limit": 0,
+"data_limit": 0,
+"expiry_date": null,
+"status": 1,
+"enabled": 1,
+"total_rx": 1024000,
+"total_tx": 512000,
+"last_login": "2023-10-01 12:00:00",
+"created_at": "2023-09-01 00:00:00",
+"updated_at": "2023-10-01 12:00:00"
+}
+]
+2. 获取用户管理信息
+方法：GET
+路径：/api/users/management
+描述：获取包含在线状态、会话信息的用户管理列表
+响应示例：
+[
+{
+"id": 1,
+"peer_pubkey": "abcdef123456...",
+"nickname": "User_1",
+"mail": "user1@example.com",
+"phone": "13800138000",
+"login_ip": "192.168.1.1",
+"status": 1,
+"enabled": 1,
+"is_online": 1,
+"total_rx": 1024000,
+"total_tx": 512000,
+"last_login": "2023-10-01 12:00:00",
+"session_start": "2023-10-01 12:00:00"
+}
+]
+3. 获取事件列表
+方法：GET
+路径：/api/events
+描述：获取用户会话事件信息（包含会话开始 / 结束时间、流量等）
+4. 获取事件历史
+方法：GET
+路径：/api/events/history
+描述：获取历史会话事件记录
+5. 获取系统状态
+方法：GET
+路径：/api/status
+描述：获取 WireGuard 系统当前运行状态
+6. 获取仪表盘统计数据
+方法：GET
+路径：/api/dashboard
+描述：获取系统总用户数、在线用户数、流量统计等仪表盘数据
+响应示例：
+{
+"total_users": 50,
+"online_users": 10,
+"active_sessions": 8,
+"total_rx": 104857600,
+"total_tx": 52428800,
+"today_rx": 10485760,
+"today_tx": 5242880,
+"uptime_start": "2023-09-01 00:00:00"
+}
+7. 获取流量图表数据
+方法：GET
+路径：/api/traffic/chart
+描述：获取指定天数的流量统计图表数据（默认 7 天）
+响应示例：
+[
+{
+"date": "2023-10-01",
+"total_rx": 10485760,
+"total_tx": 5242880
+},
+{
+"date": "2023-10-02",
+"total_rx": 20971520,
+"total_tx": 10485760
+}
+]
+8. 处理用户操作
+方法：GET
+路径：/api/users/{id}/action
+描述：对指定 ID 的用户执行特定操作（需结合具体 action 参数）
+二、POST 请求 API
+1. 创建新用户
+方法：POST
+路径：/api/users/create
+描述：创建新的 WireGuard 用户
+请求体参数：
+peer_pubkey（必填）：用户的公钥
+nickname（可选）：用户昵称
+mail（可选）：用户邮箱
+phone（可选）：用户电话
+请求示例：
+{
+"peer_pubkey": "newpubkey123456...",
+"nickname": "NewUser",
+"mail": "new@example.com"
+}
+响应示例：
+{
+"status": "success",
+"message": "用户创建成功",
+"user_id": 2
+}
+2. 更新用户信息
+方法：POST
+路径：/api/users/{id}/update
+描述：更新指定 ID 用户的信息
+请求体参数（可选）：
+nickname：用户昵称
+mail：用户邮箱
+phone：用户电话
+bandwidth_limit：带宽限制（KB/s，0 表示无限制）
+data_limit：数据限制（MB，0 表示无限制）
+expiry_date：到期时间
+enabled：是否启用（1 = 启用，0 = 禁用）
+响应示例：
+{
+"status": "success",
+"message": "用户信息更新成功"
+}
